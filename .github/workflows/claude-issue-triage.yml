@@ -42,6 +42,8 @@ jobs:
                - Las labels que aplicaste y por qué.
                - Referencias a issues/PRs relacionados o duplicados (usando `#numero`) si encontraste alguno,
                  o indica explícitamente que no encontraste ninguno.
+               El comentario debe estar redactado en formato Markdown bien estructurado y legible en GitHub
+               (encabezados, listas y bloques de código donde corresponda).
             5. No hagas cambios de código ni abras pull requests. Solo etiqueta, referencia y comenta.
 
           claude_args: |
