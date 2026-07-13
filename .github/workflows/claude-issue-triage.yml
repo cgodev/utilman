@@ -1,0 +1,48 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code Triage
+        id: claude-triage
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          prompt: |
+            Se acaba de abrir el issue #${{ github.event.issue.number }} en este repositorio.
+
+            Tu tarea es triarlo:
+            1. Lee el título y el cuerpo del issue con `gh issue view ${{ github.event.issue.number }}`.
+            2. Revisa las labels existentes en el repo con `gh label list` y aplica las que correspondan
+               (por ejemplo: bug, enhancement, documentation, question, duplicate, needs-info) usando
+               `gh issue edit ${{ github.event.issue.number }} --add-label "..."`. Si necesitas una label
+               que no existe y es claramente útil, créala con `gh label create` antes de aplicarla.
+            3. Busca issues y pull requests relacionados o potencialmente duplicados con
+               `gh issue list` / `gh search issues` / `gh search prs`, usando palabras clave del título y cuerpo.
+            4. Publica un único comentario en el issue (`gh issue comment ${{ github.event.issue.number }}`)
+               que incluya:
+               - Un resumen breve de tu entendimiento del issue.
+               - Las labels que aplicaste y por qué.
+               - Referencias a issues/PRs relacionados o duplicados (usando `#numero`) si encontraste alguno,
+                 o indica explícitamente que no encontraste ninguno.
+            5. No hagas cambios de código ni abras pull requests. Solo etiqueta, referencia y comenta.
+
+          claude_args: |
+            --allowed-tools "Bash(gh issue view:*),Bash(gh issue edit:*),Bash(gh issue comment:*),Bash(gh issue list:*),Bash(gh label list:*),Bash(gh label create:*),Bash(gh search issues:*),Bash(gh search prs:*)"
